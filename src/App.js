@@ -23,7 +23,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.trainsFetch();
-    let intervalID = setInterval(this.trainsFetch, 10000);
+    let intervalID = setInterval(this.trainsFetch, 5000);
 
     this.setState({
       intervalID
