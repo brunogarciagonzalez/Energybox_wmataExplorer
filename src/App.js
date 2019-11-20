@@ -53,6 +53,7 @@ class App extends React.Component {
           this.setState({
             errorMessage: trainData.message
           });
+          return 403;
         }
         let sortedTrains = trainData["TrainPositions"].sort((a, b) => {
           return parseInt(a.TrainId) - parseInt(b.TrainId);
