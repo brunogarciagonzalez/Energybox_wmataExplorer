@@ -23,6 +23,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.trainsFetch();
+    // make sure fetch is clean before setInterval
     let intervalID = setInterval(this.trainsFetch, 5000);
 
     this.setState({
@@ -44,6 +45,13 @@ class App extends React.Component {
     fetch(URL, options)
       .then(responseObj => responseObj.json())
       .then(trainData => {
+        if (trainData.statusCode === 403) {
+          clearInterval(this.state.intervalID);
+          alert(
+            "Whoops! It appears that the WMATA Server is unavailable:\n" +
+              trainData.message
+          );
+        }
         let sortedTrains = trainData["TrainPositions"].sort((a, b) => {
           return parseInt(a.TrainId) - parseInt(b.TrainId);
         });
