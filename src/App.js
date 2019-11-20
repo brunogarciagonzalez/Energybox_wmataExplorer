@@ -3,6 +3,8 @@ import React from "react";
 import Header from "./components/Header";
 import FiltersContainer from "./components/FiltersContainer";
 import TableContainer from "./components/TableContainer";
+import ErrorBox from "./components/ErrorBox";
+
 import API_KEY from "./misc/API_KEY";
 import URL from "./misc/URL";
 
@@ -11,6 +13,7 @@ class App extends React.Component {
     super();
 
     this.state = {
+      errorMessage: "",
       trains: [],
       intervalID: 0,
       filters: {
@@ -23,6 +26,7 @@ class App extends React.Component {
 
   componentDidMount() {
     this.trainsFetch();
+    // make sure fetch is clean before setInterval
     let intervalID = setInterval(this.trainsFetch, 5000);
 
     this.setState({
@@ -44,6 +48,12 @@ class App extends React.Component {
     fetch(URL, options)
       .then(responseObj => responseObj.json())
       .then(trainData => {
+        if (trainData.statusCode === 403) {
+          clearInterval(this.state.intervalID);
+          this.setState({
+            errorMessage: trainData.message
+          });
+        }
         let sortedTrains = trainData["TrainPositions"].sort((a, b) => {
           return parseInt(a.TrainId) - parseInt(b.TrainId);
         });
@@ -99,6 +109,9 @@ class App extends React.Component {
         <Header />
         <FiltersContainer handleFilterChange={this.handleFilterChange} />
         <TableContainer trains={this.filteredTrains()} />
+        {this.state.errorMessage.length > 0 ? (
+          <ErrorBox message={this.state.errorMessage} />
+        ) : null}
       </div>
     );
   }
