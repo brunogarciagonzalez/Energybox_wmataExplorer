@@ -3,6 +3,8 @@ import React from "react";
 import Header from "./components/Header";
 import FiltersContainer from "./components/FiltersContainer";
 import TableContainer from "./components/TableContainer";
+import ErrorBox from "./components/ErrorBox";
+
 import API_KEY from "./misc/API_KEY";
 import URL from "./misc/URL";
 
@@ -11,6 +13,7 @@ class App extends React.Component {
     super();
 
     this.state = {
+      errorMessage: "",
       trains: [],
       intervalID: 0,
       filters: {
@@ -47,10 +50,10 @@ class App extends React.Component {
       .then(trainData => {
         if (trainData.statusCode === 403) {
           clearInterval(this.state.intervalID);
-          alert(
-            "Whoops! It appears that the WMATA Server is unavailable:\n" +
-              trainData.message
-          );
+          this.setState({
+            errorMessage: trainData.message
+          });
+          return 403;
         }
         let sortedTrains = trainData["TrainPositions"].sort((a, b) => {
           return parseInt(a.TrainId) - parseInt(b.TrainId);
@@ -107,6 +110,9 @@ class App extends React.Component {
         <Header />
         <FiltersContainer handleFilterChange={this.handleFilterChange} />
         <TableContainer trains={this.filteredTrains()} />
+        {this.state.errorMessage.length > 0 ? (
+          <ErrorBox message={this.state.errorMessage} />
+        ) : null}
       </div>
     );
   }
